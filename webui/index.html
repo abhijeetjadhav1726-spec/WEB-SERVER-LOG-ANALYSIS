@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spark Log Analyzer | Intelligent Cluster Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                    </svg>
+                </div>
+                <div class="brand-info">
+                    <h2>SparkLog</h2>
+                    <span class="badge spark-badge">Apache Spark 1.5</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="dashboard">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    </svg>
+                    <span>Analytics Dashboard</span>
+                </button>
+                <button class="nav-item" data-tab="explorer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <span>Log Explorer</span>
+                </button>
+                <button class="nav-item" data-tab="streaming">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                    <span>Spark Streaming</span>
+                    <span class="pulse-indicator"></span>
+                </button>
+                <button class="nav-item" data-tab="backend">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="4 17 10 11 4 5"/>
+                        <line x1="12" y1="19" x2="20" y2="19"/>
+                    </svg>
+                    <span>Spark CLI Runner</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="cluster-status">
+                    <div class="status-dot online"></div>
+                    <div class="status-details">
+                        <span class="status-title">Engine Status</span>
+                        <span class="status-sub">Spark & Hadoop Ready</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <div class="header-title">
+                    <h1 id="page-title">Analytics Dashboard</h1>
+                    <p class="subtitle">Distributed Apache Access Log Intelligence & Metric Analysis</p>
+                </div>
+
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="btn-load-sample">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        </svg>
+                        <span>Sample Logs</span>
+                    </button>
+
+                    <label class="btn btn-secondary file-upload-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <span>Upload Log</span>
+                        <input type="file" id="file-input" accept=".log,.txt" style="display:none;">
+                    </label>
+
+                    <button class="btn btn-primary" id="btn-analyze-now">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                        <span>Run Analysis</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- TAB 1: DASHBOARD -->
+            <div class="tab-panel active" id="tab-dashboard">
+                <!-- KPI Metric Cards Grid -->
+                <div class="kpi-grid">
+                    <div class="kpi-card glass-panel">
+                        <div class="kpi-header">
+                            <span class="kpi-label">TOTAL REQUESTS</span>
+                            <div class="kpi-icon blue">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="kpi-total-requests">--</div>
+                        <div class="kpi-footer">
+                            <span class="kpi-meta">Analyzed log records</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card glass-panel">
+                        <div class="kpi-header">
+                            <span class="kpi-label">AVG CONTENT SIZE</span>
+                            <div class="kpi-icon purple">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="kpi-avg-size">--</div>
+                        <div class="kpi-footer">
+                            <span class="kpi-tag" id="kpi-min-size">Min: 0 B</span>
+                            <span class="kpi-tag" id="kpi-max-size">Max: 0 B</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card glass-panel">
+                        <div class="kpi-header">
+                            <span class="kpi-label">TOTAL BANDWIDTH</span>
+                            <div class="kpi-icon green">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                    <polyline points="17 6 23 6 23 12"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="kpi-total-bandwidth">--</div>
+                        <div class="kpi-footer">
+                            <span class="kpi-meta" id="kpi-bandwidth-meta">Transferred bytes</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card glass-panel">
+                        <div class="kpi-header">
+                            <span class="kpi-label">HIGH-FREQUENCY CLIENTS</span>
+                            <div class="kpi-icon orange">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                    <line x1="12" y1="9" x2="12" y2="13"/>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="kpi-suspicious-ips">--</div>
+                        <div class="kpi-footer">
+                            <span class="kpi-meta">> 10 requests from single IP</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-grid">
+                    <div class="chart-card glass-panel">
+                        <div class="chart-header">
+                            <div class="chart-title-group">
+                                <h3>HTTP Response Status Distribution</h3>
+                                <p class="chart-sub">Status codes grouped by frequency</p>
+                            </div>
+                            <div class="chart-tag" id="status-success-rate">100% Success</div>
+                        </div>
+                        <div class="chart-body doughnut-container">
+                            <canvas id="responseCodeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card glass-panel">
+                        <div class="chart-header">
+                            <div class="chart-title-group">
+                                <h3>Top 10 Requested Endpoints</h3>
+                                <p class="chart-sub">Most frequently accessed resources</p>
+                            </div>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="topEndpointsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suspicious IPs and Insights Row -->
+                <div class="insights-grid">
+                    <div class="insight-card glass-panel">
+                        <div class="insight-header">
+                            <div class="insight-icon red">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3>High Volume Clients (> 10 Requests)</h3>
+                                <p class="chart-sub">Potential scrapers, bots, or power users identified by Spark</p>
+                            </div>
+                        </div>
+                        <div class="ip-list" id="high-volume-ip-list">
+                            <div class="empty-state">No analysis performed yet</div>
+                        </div>
+                    </div>
+
+                    <div class="insight-card glass-panel">
+                        <div class="insight-header">
+                            <div class="insight-icon cyan">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="4 17 10 11 4 5"/>
+                                    <line x1="12" y1="19" x2="20" y2="19"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3>Apache Spark Query Log</h3>
+                                <p class="chart-sub">Summary of computations completed across RDD & SQL engines</p>
+                            </div>
+                        </div>
+                        <div class="spark-summary-box" id="spark-summary-box">
+                            <div class="summary-line"><span class="code-kw">RDD:</span> JavaRDD&lt;ApacheAccessLog&gt; parsed & cached in memory</div>
+                            <div class="summary-line"><span class="code-kw">SQL:</span> Registered temporary table `logs` via DataFrame</div>
+                            <div class="summary-line"><span class="code-kw">Engine:</span> Spark Core 1.5.1 on Java 8 Hotspot</div>
+                            <div class="summary-line"><span class="code-kw">Status:</span> Idle, ready for next job</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: LOG EXPLORER -->
+            <div class="tab-panel" id="tab-explorer">
+                <div class="explorer-card glass-panel">
+                    <div class="explorer-toolbar">
+                        <div class="search-input-wrapper">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            <input type="text" id="log-search-input" placeholder="Search by IP, Endpoint, Method, or Status...">
+                        </div>
+                        <div class="filter-pills">
+                            <button class="pill active" data-filter="all">All</button>
+                            <button class="pill" data-filter="2xx">2xx OK</button>
+                            <button class="pill" data-filter="3xx">3xx Redirect</button>
+                            <button class="pill" data-filter="4xx">4xx Client Error</button>
+                            <button class="pill" data-filter="5xx">5xx Server Error</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="log-table">
+                            <thead>
+                                <tr>
+                                    <th>Client IP</th>
+                                    <th>Timestamp</th>
+                                    <th>Method</th>
+                                    <th>Endpoint</th>
+                                    <th>Status</th>
+                                    <th>Size</th>
+                                </tr>
+                            </thead>
+                            <tbody id="log-table-body">
+                                <tr>
+                                    <td colspan="6" class="text-center">No logs loaded. Click "Sample Logs" or upload an access.log file.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <span id="log-count-display">Showing 0 logs</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: SPARK STREAMING SIMULATOR -->
+            <div class="tab-panel" id="tab-streaming">
+                <div class="streaming-dashboard">
+                    <div class="stream-control-card glass-panel">
+                        <div class="stream-info">
+                            <div class="pulse-indicator big"></div>
+                            <div>
+                                <h3>Spark Live Stream Engine</h3>
+                                <p class="chart-sub">Simulating Spark Streaming socket sliding window (Window: 30s, Slide: 10s)</p>
+                            </div>
+                        </div>
+                        <div class="stream-actions">
+                            <button class="btn btn-primary" id="btn-toggle-stream">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="stream-icon">
+                                    <polygon points="5 3 19 12 5 21 5 3"/>
+                                </svg>
+                                <span id="stream-btn-text">Start Live Stream</span>
+                            </button>
+                            <button class="btn btn-secondary" id="btn-clear-stream">Clear</button>
+                        </div>
+                    </div>
+
+                    <div class="stream-stats-grid">
+                        <div class="mini-kpi glass-panel">
+                            <span class="mini-label">Window Requests (30s)</span>
+                            <span class="mini-val" id="stream-window-count">0</span>
+                        </div>
+                        <div class="mini-kpi glass-panel">
+                            <span class="mini-label">Window Avg Size</span>
+                            <span class="mini-val" id="stream-window-avg">0 B</span>
+                        </div>
+                        <div class="mini-kpi glass-panel">
+                            <span class="mini-label">Active IPs in Window</span>
+                            <span class="mini-val" id="stream-window-ips">0</span>
+                        </div>
+                    </div>
+
+                    <div class="stream-feed glass-panel">
+                        <div class="feed-header">
+                            <h4>Real-Time Log Stream Pipeline</h4>
+                            <span class="badge live-badge">LIVE SOCKET: 9999</span>
+                        </div>
+                        <div class="feed-terminal" id="stream-feed-terminal">
+                            <div class="terminal-line placeholder">Stream inactive. Click "Start Live Stream" to simulate incoming traffic...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: BACKEND RUNNER -->
+            <div class="tab-panel" id="tab-backend">
+                <div class="backend-card glass-panel">
+                    <div class="backend-header">
+                        <div>
+                            <h3>Execute Native Spark Job</h3>
+                            <p class="chart-sub">Launch `spark-submit` on local Spark cluster via Java 8 and Hadoop 2.6</p>
+                        </div>
+                        <div class="backend-btn-group">
+                            <select id="spark-mode-select" class="form-select">
+                                <option value="all">All (RDD + SQL)</option>
+                                <option value="rdd">LogAnalyzer (RDD Only)</option>
+                                <option value="sql">LogAnalyzerSQL (SQL Only)</option>
+                            </select>
+                            <button class="btn btn-primary" id="btn-run-backend-spark">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="5 3 19 12 5 21 5 3"/>
+                                </svg>
+                                <span>Launch Spark Submit</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="terminal-container">
+                        <div class="terminal-bar">
+                            <div class="terminal-dots">
+                                <span class="dot red"></span>
+                                <span class="dot yellow"></span>
+                                <span class="dot green"></span>
+                            </div>
+                            <span class="terminal-title">Spark Execution Console (stdout & stderr)</span>
+                            <button class="btn-clear-term" id="btn-clear-term">Clear</button>
+                        </div>
+                        <pre class="terminal-content" id="spark-console">
+[Ready] Click "Launch Spark Submit" to execute the Spark cluster job.
+Configured JAVA_HOME: C:\Program Files\Eclipse Adoptium\jdk-8.0.504.1-hotspot
+Configured HADOOP_HOME: C:\Users\Abhijeet Jadhav\Downloads\hadoop
+Spark Assembly: spark-assembly-1.5.1-hadoop2.6.0.jar
+Target JAR: target\spark-log-analysis-0.0.1-SNAPSHOT.jar
+                        </pre>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Script -->
+    <script src="app.js"></script>
+</body>
+</html>
